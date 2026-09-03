@@ -65,7 +65,7 @@ def product_list_view(request, category_slug=None):
     }
 
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        html = render_to_string('partials/product_results.html', context, request=request)
+        html = render_to_string('product_results.html', context, request=request)
         return JsonResponse({'html': html, 'count': paginator.count})
 
     return render(request, 'product_list.html', context)

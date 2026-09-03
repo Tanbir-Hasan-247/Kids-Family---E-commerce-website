@@ -60,6 +60,11 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 
+LOGIN_URL = "/login/"
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
+
+
 # ==========================================
 # SOCIAL ACCOUNT SETTINGS
 # ==========================================
@@ -171,16 +176,16 @@ INTERNAL_IPS = [
     # ...
 ]
 
-ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = ['*']
 
-CSRF_TRUSTED_ORIGINS = [
-    'https://*.ngrok-free.app', 
-    'https://*.ngrok.io',
-    'https://*.ngrok.app', # নতুন ngrok ডোমেইনগুলোর জন্য
-]
+# CSRF_TRUSTED_ORIGINS = [
+#     'https://*.ngrok-free.app', 
+#     'https://*.ngrok.io',
+#     'https://*.ngrok.app', # নতুন ngrok ডোমেইনগুলোর জন্য
+# ]
 
-# Ngrok-এর HTTPS থেকে HTTP তে আসার কনফিউশন দূর করার জন্য
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# # Ngrok-এর HTTPS থেকে HTTP তে আসার কনফিউশন দূর করার জন্য
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration

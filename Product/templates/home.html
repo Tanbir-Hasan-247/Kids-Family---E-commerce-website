@@ -273,7 +273,12 @@
 
         grid.style.opacity = '0.4';
 
-        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        fetch(url, { 
+          headers: { 
+            'X-Requested-With': 'XMLHttpRequest',
+            'ngrok-skip-browser-warning': 'true'  // Ngrok বাইপাস করার জন্য
+          } 
+        })
           .then(res => res.json())
           .then(data => {
             grid.innerHTML = data.html;

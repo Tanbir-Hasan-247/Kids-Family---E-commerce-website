@@ -360,10 +360,11 @@
           return match ? decodeURIComponent(match.pop()) : '';
         }
 
+        // ============ Cart Drawer Logic ============
         function loadCartDrawer() {
           cartContent.innerHTML = '<div class="flex-grow flex items-center justify-center text-sm text-ink/50">Loading...</div>';
 
-          fetch('/cart/drawer/')
+          fetch('/cart/drawer/', { headers: { 'ngrok-skip-browser-warning': 'true' } })
             .then(response => response.json())
             .then(data => {
               if (data.html) {
@@ -392,7 +393,10 @@
 
           fetch(`/cart/remove/${itemId}/`, {
             method: 'POST',
-            headers: { 'X-CSRFToken': getCookie('csrftoken') },
+            headers: { 
+                'X-CSRFToken': getCookie('csrftoken'),
+                'ngrok-skip-browser-warning': 'true'
+            },
           })
             .then(res => res.json())
             .then(data => {
@@ -405,28 +409,77 @@
             .catch(() => { btn.disabled = false; });
         });
 
-        wishlistToggle.addEventListener('change', function() {
-          if (this.checked) {
-            wishlistContent.innerHTML = '<div class="flex-grow flex items-center justify-center text-sm text-ink/50">Loading...</div>';
+        // ============ Wishlist Drawer Logic ============
+        function loadWishlistDrawer() {
+          wishlistContent.innerHTML = '<div class="flex-grow flex items-center justify-center text-sm text-ink/50">Loading...</div>';
 
-            fetch('/favorites/mini/')
-              .then(response => response.json())
-              .then(data => {
-                if (data.html) {
-                  wishlistContent.innerHTML = data.html;
-                  document.querySelectorAll('.favorite-count-badge').forEach(badge => {
-                    badge.textContent = data.count;
-                  });
-                }
-              })
-              .catch(error => {
-                console.error('Error fetching wishlist:', error);
-                wishlistContent.innerHTML = '<div class="flex-grow flex items-center justify-center text-sm text-clay mt-4">Failed to load wishlist.</div>';
-              });
-          }
+          fetch('/favorites/mini/', { headers: { 'ngrok-skip-browser-warning': 'true' } })
+            .then(response => response.json())
+            .then(data => {
+              if (data.html) {
+                wishlistContent.innerHTML = data.html;
+                document.querySelectorAll('.favorite-count-badge').forEach(badge => {
+                  badge.textContent = data.count;
+                });
+              }
+            })
+            .catch(error => {
+              console.error('Error fetching wishlist:', error);
+              wishlistContent.innerHTML = '<div class="flex-grow flex items-center justify-center text-sm text-clay mt-4">Failed to load wishlist.</div>';
+            });
+        }
+
+        wishlistToggle.addEventListener('change', function() {
+          if (this.checked) loadWishlistDrawer();
         });
 
-        document.addEventListener('click', function(e) {
+        // ============ GLOBAL EVENT DELEGATION (Heart Icons & Remove Buttons) ============
+        document.body.addEventListener('click', function(e) {
+            
+            // 1. Toggle Wishlist from Heart Icon
+            const favBtn = e.target.closest('.favorite-btn');
+            if (favBtn) {
+                e.preventDefault();
+                const productId = favBtn.dataset.productId;
+                const svg = favBtn.querySelector('svg');
+
+                fetch(`/favorites/toggle/${productId}/`, {
+                    method: 'POST',
+                    headers: { 
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'ngrok-skip-browser-warning': 'true'
+                    },
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.success) return;
+
+                    // Update clicked button styling
+                    favBtn.setAttribute('aria-pressed', data.favorited);
+                    if (data.favorited) {
+                        favBtn.classList.remove('text-ink/50', 'hover:text-clay');
+                        favBtn.classList.add('text-clay');
+                        if (svg) svg.setAttribute('fill', 'currentColor');
+                    } else {
+                        favBtn.classList.remove('text-clay');
+                        favBtn.classList.add('text-ink/50', 'hover:text-clay');
+                        if (svg) svg.setAttribute('fill', 'none');
+                    }
+
+                    // Global Badge Update (targets all elements with class .favorite-count-badge)
+                    document.querySelectorAll('.favorite-count-badge').forEach(b => b.textContent = data.count);
+
+                    // Refresh drawer if it is currently open
+                    if (wishlistToggle.checked) {
+                        loadWishlistDrawer();
+                    }
+                })
+                .catch(err => console.error(err));
+                return;
+            }
+
+            // 2. Remove Item from Wishlist Drawer
             if (e.target.classList.contains('wishlist-drawer-remove-btn')) {
                 const btn = e.target;
                 const productId = btn.dataset.productId;
@@ -435,12 +488,28 @@
 
                 fetch(`/favorites/toggle/${productId}/`, {
                     method: 'POST',
-                    headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                    headers: { 
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'ngrok-skip-browser-warning': 'true'
+                    },
                 })
                 .then(res => res.json())
                 .then(data => {
+                    // Update global badges
                     document.querySelectorAll('.favorite-count-badge').forEach(b => b.textContent = data.count);
-                    wishlistToggle.dispatchEvent(new Event('change'));
+                    
+                    // Sync the main page heart icon if it exists
+                    const productFavBtn = document.querySelector(`.favorite-btn[data-product-id="${productId}"]`);
+                    if (productFavBtn) {
+                        productFavBtn.setAttribute('aria-pressed', 'false');
+                        productFavBtn.classList.remove('text-clay');
+                        productFavBtn.classList.add('text-ink/50', 'hover:text-clay');
+                        const svg = productFavBtn.querySelector('svg');
+                        if (svg) svg.setAttribute('fill', 'none');
+                    }
+
+                    // Reload the drawer content
+                    loadWishlistDrawer();
                 })
                 .catch(error => {
                     console.error('Error removing from wishlist:', error);

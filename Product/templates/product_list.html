@@ -155,7 +155,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
         resultsContainer.style.opacity = '0.4';
 
-        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        fetch(url, { 
+            headers: { 
+                'X-Requested-With': 'XMLHttpRequest',
+                'ngrok-skip-browser-warning': 'true' // Ngrok fix
+            } 
+        })
             .then(res => res.json())
             .then(data => {
                 resultsContainer.innerHTML = data.html;
@@ -237,8 +242,6 @@ document.addEventListener('DOMContentLoaded', function () {
         loadResults(params.get('page'), false);
     });
 
-    // ============ FAVORITE (heart icon) — event delegation, karon AJAX
-    // filter er por notun button DOM e ashe, tader upor direct listener lagano jay na ============
     function getCookie(name) {
         const match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
         return match ? decodeURIComponent(match.pop()) : '';
@@ -257,6 +260,7 @@ document.addEventListener('DOMContentLoaded', function () {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'X-CSRFToken': getCookie('csrftoken'),
+                'ngrok-skip-browser-warning': 'true' // Ngrok fix
             },
         })
             .then(res => res.json())
@@ -274,8 +278,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     svg.setAttribute('fill', 'none');
                 }
 
-                const favBadge = document.getElementById('favorite-count-badge');
-                if (favBadge) favBadge.textContent = data.count;
+                // FIX: Update all badges using Class instead of ID
+                document.querySelectorAll('.favorite-count-badge').forEach(badge => {
+                    badge.textContent = data.count;
+                });
             })
             .catch(() => {});
     });

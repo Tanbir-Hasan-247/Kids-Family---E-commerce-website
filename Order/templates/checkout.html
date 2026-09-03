@@ -70,13 +70,39 @@
 
                 <div class="space-y-3">
                     {% for radio in form.payment_method %}
-                    <label class="flex items-center gap-3 px-4 py-3.5 border border-ink/15 cursor-pointer has-[:checked]:border-pine has-[:checked]:bg-pine/5 transition">
-                        {{ radio.tag }}
-                        <span class="text-sm text-ink font-medium">{{ radio.choice_label }}</span>
+
+                    <label
+                        class="flex items-center gap-3 px-4 py-3.5 border border-ink/15
+                        {% if radio.data.value != 'online' %}
+                            cursor-pointer
+                            has-[:checked]:border-pine has-[:checked]:bg-pine/5
+                        {% else %}
+                            opacity-50 cursor-not-allowed
+                        {% endif %}
+                        transition"
+                    >
                         {% if radio.data.value == 'online' %}
-                        <span class="text-[10px] font-semibold px-2 py-[3px] rounded-full bg-mustard/20 text-mustard ml-auto">Coming soon setup</span>
+                            <input
+                                type="radio"
+                                name="{{ radio.data.name }}"
+                                value="{{ radio.data.value }}"
+                                disabled
+                            >
+                        {% else %}
+                            {{ radio.tag }}
+                        {% endif %}
+
+                        <span class="text-sm text-ink font-medium">
+                            {{ radio.choice_label }}
+                        </span>
+
+                        {% if radio.data.value == 'online' %}
+                            <span class="text-[10px] font-semibold px-2 py-[3px] rounded-full bg-mustard/20 text-mustard ml-auto">
+                                Coming soon setup
+                            </span>
                         {% endif %}
                     </label>
+
                     {% endfor %}
                 </div>
             </div>

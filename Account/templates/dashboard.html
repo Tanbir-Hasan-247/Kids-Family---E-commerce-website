@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}My Dashboard | Kids & Family{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+
+    <h1 class="brand-font text-3xl sm:text-4xl font-semibold text-ink mb-8 border-b border-ink/10 pb-6">My Account</h1>
+
+    <div class="flex flex-col md:flex-row gap-10">
+        <!-- Sidebar Include -->
+        {% include 'partials/account_sidebar.html' %}
+
+        <!-- MAIN CONTENT -->
+        <main class="w-full md:w-3/4 flex flex-col gap-8">
+            
+            <!-- Welcome Banner -->
+            <div class="bg-pine text-cream p-8 sm:p-10 relative overflow-hidden border border-pine">
+                <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-cream opacity-5"></div>
+                <div class="absolute bottom-0 right-32 -mb-10 w-32 h-32 rounded-full bg-mustard opacity-10"></div>
+                
+                <div class="relative z-10">
+                    <h2 class="brand-font text-2xl sm:text-3xl font-semibold mb-2">Welcome back!</h2>
+                    <p class="text-sm text-cream/70 max-w-md leading-relaxed">From here you can view your recent orders, track processing statuses, and manage your account details.</p>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-paper border border-ink/10 p-6 flex flex-col justify-center items-center text-center">
+                    <div class="w-12 h-12 rounded-full bg-pine/10 text-pine flex items-center justify-center mb-3">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                    </div>
+                    <p class="text-2xl font-bold text-ink">{{ total_orders|default:"0" }}</p>
+                    <p class="text-xs text-ink/50 uppercase tracking-widest mt-1 font-semibold">Total Orders</p>
+                </div>
+                
+                <div class="bg-paper border border-ink/10 p-6 flex flex-col justify-center items-center text-center">
+                    <div class="w-12 h-12 rounded-full bg-mustard/10 text-mustard flex items-center justify-center mb-3">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <p class="text-2xl font-bold text-ink">{{ pending_orders|default:"0" }}</p>
+                    <p class="text-xs text-ink/50 uppercase tracking-widest mt-1 font-semibold">Processing</p>
+                </div>
+
+                <div class="bg-paper border border-ink/10 p-6 flex flex-col justify-center items-center text-center">
+                    <div class="w-12 h-12 rounded-full bg-clay/10 text-clay flex items-center justify-center mb-3">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                    </div>
+                    <p class="text-2xl font-bold text-ink">{{ wishlist_count|default:"0" }}</p>
+                    <p class="text-xs text-ink/50 uppercase tracking-widest mt-1 font-semibold">Saved Items</p>
+                </div>
+            </div>
+
+            <!-- Recent Orders Snippet -->
+            <div>
+                <div class="flex items-center justify-between mb-4 border-b border-ink/10 pb-4">
+                    <h3 class="brand-font text-xl font-semibold text-ink">Recent Orders</h3>
+                    <a href="{% url 'orders:order_history' %}" class="text-sm font-semibold text-pine hover:text-pinedeep hover:underline transition">View all</a>
+                </div>
+
+                {% if recent_orders %}
+                    <div class="space-y-3">
+                        {% for order in recent_orders %}
+                        <a href="{% url 'orders:order_detail' order.order_number %}" class="flex flex-wrap items-center justify-between gap-4 p-4 bg-paper border border-ink/10 hover:border-pine/40 transition">
+                            <div>
+                                <p class="text-sm font-semibold text-ink">{{ order.order_number }}</p>
+                                <p class="text-xs text-ink/45">{{ order.created_at|date:"d M Y, h:i A" }}</p>
+                            </div>
+                            <div class="flex items-center gap-3 sm:gap-6">
+                                <span class="text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-widest
+                                    {% if order.status == 'delivered' %}bg-pine/10 text-pine
+                                    {% elif order.status == 'cancelled' %}bg-clay/10 text-clay
+                                    {% else %}bg-mustard/15 text-mustard{% endif %}">
+                                    {{ order.get_status_display }}
+                                </span>
+                                <p class="text-sm font-semibold text-ink w-16 text-right">৳{{ order.total }}</p>
+                                <svg class="w-4 h-4 text-ink/30 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-10 border border-ink/10 bg-paper">
+                        <svg class="w-10 h-10 text-ink/20 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+                        <p class="text-sm text-ink/50 mb-4">You haven't placed any orders yet.</p>
+                        <a href="{% url 'store:product_list' %}" class="inline-block px-5 py-2.5 border border-pine text-pine text-sm font-semibold rounded-full hover:bg-pine hover:text-cream transition">Start shopping</a>
+                    </div>
+                {% endif %}
+            </div>
+
+        </main>
+    </div>
+</div>
+{% endblock %}
