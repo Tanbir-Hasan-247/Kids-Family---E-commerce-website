@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Complete Payment | Kids & Family{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto px-4 sm:px-6 py-16 sm:py-24 text-center">
+
+    <div class="bg-paper border border-ink/10 p-8 sm:p-10">
+        <svg class="w-12 h-12 text-mustard mx-auto mb-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+
+        <h1 class="brand-font text-2xl font-semibold text-ink mb-2">Complete your payment</h1>
+        <p class="text-sm text-ink/55 mb-6">
+            Order <span class="font-semibold text-ink">{{ order.order_number }}</span> — online payment gateway
+            integration is coming soon. For now, click below to simulate a successful payment.
+        </p>
+
+        <div class="text-3xl font-semibold text-ink mb-8">৳{{ order.total }}</div>
+
+        <form method="POST">
+            {% csrf_token %}
+            <button type="submit" class="w-full px-6 py-3.5 bg-pine hover:bg-pinedeep text-cream font-semibold text-sm rounded-full transition">
+                Pay ৳{{ order.total }} now
+            </button>
+        </form>
+
+        <p class="text-xs text-ink/40 mt-5">This is a placeholder screen. Real payment processing will replace this shortly.</p>
+    </div>
+</div>
+{% endblock %}

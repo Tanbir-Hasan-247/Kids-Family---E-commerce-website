@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Your Favorites | Kids & Family{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+
+    <h1 class="brand-font text-3xl sm:text-4xl font-semibold text-ink mb-8 border-b border-ink/10 pb-6">Your Favorites</h1>
+
+    {% if items %}
+    <div id="favorites-grid" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5">
+        {% for item in items %}
+        {% with product=item.product %}
+        <div class="group bg-paper border border-ink/10 hover:border-pine/40 transition duration-300 flex flex-col" id="fav-card-{{ product.id }}">
+            <div class="relative overflow-hidden aspect-[4/5] bg-cream">
+
+                <button
+                    type="button"
+                    class="favorite-btn absolute top-3 right-3 z-10 p-2 bg-cream/90 rounded-full text-clay transition"
+                    data-product-id="{{ product.id }}"
+                    aria-pressed="true"
+                >
+                    <svg class="w-4 h-4" fill="currentColor" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                </button>
+
+                <a href="{% url 'store:product_detail' product.id %}">
+                    {% with variant=product.variants.first %}
+                        {% if variant and variant.image %}
+                            <img src="{{ variant.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        {% else %}
+                            <img src="https://placehold.co/400x500/EDE9DE/2F4B3C?text=No+Image" alt="Placeholder" class="w-full h-full object-cover">
+                        {% endif %}
+                    {% endwith %}
+                </a>
+
+                <a href="{% url 'store:product_detail' product.id %}" class="absolute bottom-0 left-0 right-0 bg-pine text-cream font-semibold text-sm py-3 translate-y-full group-hover:translate-y-0 transition duration-300 text-center">
+                    View details
+                </a>
+            </div>
+
+            <div class="p-4 flex-1 flex flex-col justify-between">
+                <div>
+                    <p class="text-xs text-taupe mb-1">{{ product.category.name }}</p>
+                    <h3 class="text-sm font-semibold text-ink group-hover:text-pine transition line-clamp-2 leading-snug">
+                        <a href="{% url 'store:product_detail' product.id %}">{{ product.name }}</a>
+                    </h3>
+                </div>
+                <div class="mt-3 pt-3 border-t border-ink/10">
+                    <span class="text-base font-semibold text-ink">৳{{ product.base_price }}</span>
+                </div>
+            </div>
+        </div>
+        {% endwith %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-20 border border-ink/10 bg-paper">
+        <svg class="w-14 h-14 text-ink/25 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+        <h3 class="text-xl text-ink font-semibold">No favorites yet</h3>
+        <p class="text-ink/50 mt-2 text-sm">Tap the heart icon on any product to save it here.</p>
+        <a href="{% url 'store:product_list' %}" class="mt-6 inline-block px-6 py-2.5 border border-pine text-pine text-sm font-semibold rounded-full hover:bg-pine hover:text-cream transition">Browse products</a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    function getCookie(name) {
+        const match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+        return match ? decodeURIComponent(match.pop()) : '';
+    }
+
+    // Wishlist page e heart e click korle card ta shathe shathe shore jabe (unfavorite = remove from this page)
+    document.body.addEventListener('click', function (e) {
+        const btn = e.target.closest('.favorite-btn');
+        if (!btn) return;
+        e.preventDefault();
+
+        const productId = btn.dataset.productId;
+
+        fetch(`/favorites/toggle/${productId}/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') },
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) return;
+                const badge = document.getElementById('favorite-count-badge');
+                if (badge) badge.textContent = data.count;
+
+                const card = document.getElementById(`fav-card-${productId}`);
+                if (card && !data.favorited) {
+                    card.style.opacity = '0.3';
+                    setTimeout(() => {
+                        card.remove();
+                        if (!document.querySelector('#favorites-grid .group')) {
+                            location.reload();
+                        }
+                    }, 150);
+                }
+            });
+    });
+});
+</script>
+{% endblock %}

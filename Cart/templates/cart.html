@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Your Bag | Kids & Family{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+
+    <h1 class="brand-font text-3xl sm:text-4xl font-semibold text-ink mb-8 border-b border-ink/10 pb-6">Your Bag</h1>
+
+    <div id="cart-wrap">
+        {% include 'cart_items.html' %}
+    </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const wrap = document.getElementById('cart-wrap');
+
+    function getCookie(name) {
+        const match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+        return match ? decodeURIComponent(match.pop()) : '';
+    }
+
+    function refreshBadge(count) {
+        document.querySelectorAll('.cart-count-badge').forEach(badge => {
+            badge.textContent = count;
+        });
+        const legacyBadge = document.getElementById('cart-count-badge');
+        if (legacyBadge) legacyBadge.textContent = count;
+    }
+
+    function updateRowSubtotal(row, value) {
+        row.querySelectorAll('.row-subtotal').forEach(el => {
+            el.textContent = '\u09F3' + value;
+        });
+    }
+
+    wrap.addEventListener('click', function (e) {
+        const qtyBtn = e.target.closest('.qty-btn');
+        const removeBtn = e.target.closest('.remove-item-btn');
+
+        if (qtyBtn) {
+            e.preventDefault();
+            const itemId = qtyBtn.dataset.itemId;
+            const action = qtyBtn.dataset.action;
+            const row = document.getElementById(`cart-row-${itemId}`);
+            row.style.opacity = '0.5';
+
+            fetch(`/cart/update/${itemId}/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                body: new URLSearchParams({ action }),
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.removed) {
+                        row.remove();
+                        if (document.querySelectorAll('.cart-row').length === 0) {
+                            location.reload();  // empty state dekhanor jonno
+                        }
+                    } else {
+                        row.querySelector('.qty-value').textContent = data.quantity;
+                        updateRowSubtotal(row, data.subtotal);
+                        row.style.opacity = '1';
+                    }
+                    document.getElementById('cart-total-value').textContent = '৳' + data.cart_total;
+                    refreshBadge(data.cart_count);
+                });
+        }
+
+        if (removeBtn) {
+            e.preventDefault();
+            const itemId = removeBtn.dataset.itemId;
+            const row = document.getElementById(`cart-row-${itemId}`);
+            row.style.opacity = '0.3';
+
+            fetch(`/cart/remove/${itemId}/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken') },
+            })
+                .then(res => res.json())
+                .then(data => {
+                    row.remove();
+                    document.getElementById('cart-total-value').textContent = '৳' + data.cart_total;
+                    refreshBadge(data.cart_count);
+                    if (document.querySelectorAll('.cart-row').length === 0) {
+                        location.reload();
+                    }
+                });
+        }
+    });
+});
+</script>
+{% endblock %}

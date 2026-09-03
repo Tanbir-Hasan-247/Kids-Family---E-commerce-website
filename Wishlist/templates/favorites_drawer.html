@@ -1,0 +1,45 @@
+{% if items %}
+<div class="flex-grow overflow-y-auto divide-y divide-ink/10">
+    {% for item in items %}
+    {% with product=item.product %}
+    <div class="flex gap-3 p-4" id="wishlist-drawer-row-{{ product.id }}">
+        <a href="{% url 'store:product_detail' product.id %}" class="w-16 h-20 shrink-0 bg-cream overflow-hidden">
+            {% with variant=product.variants.first %}
+                {% if variant and variant.image %}
+                    <img src="{{ variant.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
+                {% else %}
+                    <img src="https://placehold.co/160x200/EDE9DE/2F4B3C?text=No+Image" alt="Placeholder" class="w-full h-full object-cover">
+                {% endif %}
+            {% endwith %}
+        </a>
+
+        <div class="flex-1 min-w-0">
+            <h4 class="text-xs font-semibold text-ink line-clamp-2 leading-snug">
+                <a href="{% url 'store:product_detail' product.id %}">{{ product.name }}</a>
+            </h4>
+            <p class="text-xs text-ink/45 mt-0.5">৳{{ product.base_price }}</p>
+
+            <button
+                type="button"
+                class="wishlist-drawer-remove-btn mt-2 text-xs text-clay/80 hover:text-clay underline transition"
+                data-product-id="{{ product.id }}"
+            >
+                Remove
+            </button>
+        </div>
+    </div>
+    {% endwith %}
+    {% endfor %}
+</div>
+
+<div class="p-5 border-t border-ink/10">
+    <a href="{% url 'wishlist:favorites_view' %}" class="block text-center px-6 py-3 bg-pine hover:bg-pinedeep text-cream font-semibold text-sm rounded-full transition">
+        View all
+    </a>
+</div>
+{% else %}
+<div class="flex-grow flex flex-col items-center justify-center text-center px-6 py-16">
+    <svg class="w-12 h-12 text-ink/25 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+    <p class="text-sm text-ink/50">No favorites yet.</p>
+</div>
+{% endif %}

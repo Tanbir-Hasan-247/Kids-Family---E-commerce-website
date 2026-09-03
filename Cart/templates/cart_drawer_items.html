@@ -1,0 +1,58 @@
+{% if items %}
+  <div class="flex-grow overflow-y-auto px-6 py-4 space-y-6">
+    {% for item in items %}
+    <div class="flex gap-4 group" data-cart-item-row="{{ item.id }}">
+      <a href="{{ item.variant.product.get_absolute_url }}" class="w-20 h-24 shrink-0 rounded-md overflow-hidden bg-white">
+        {% if item.variant.image %}
+            <img src="{{ item.variant.image.url }}" alt="{{ item.variant.product.name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+        {% else %}
+            <img src="https://placehold.co/150x200/F3F5EF/2F4B3C?text=No+Image" class="w-full h-full object-cover">
+        {% endif %}
+      </a>
+
+      <div class="flex flex-col flex-grow justify-center">
+        <div class="flex justify-between items-start">
+          <a href="{{ item.variant.product.get_absolute_url }}" class="text-sm font-medium text-ink hover:text-pine transition line-clamp-2 pr-2">{{ item.variant.product.name }}</a>
+          <button
+            type="button"
+            class="remove-cart-item-btn text-ink/40 hover:text-clay transition mt-0.5 shrink-0"
+            data-item-id="{{ item.id }}"
+            aria-label="Remove item"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+          </button>
+        </div>
+
+        <!-- Showing Variant Attributes (e.g. Color: Red | Size: M) -->
+        <p class="text-[11px] text-ink/50 mt-1">
+          {% for attr in item.variant.attributes.all %}
+             {{ attr.value }}{% if not forloop.last %} | {% endif %}
+          {% endfor %}
+        </p>
+
+        <div class="flex items-center justify-between mt-3">
+          <span class="text-xs font-medium px-2 bg-ink/5 rounded">Qty: {{ item.quantity }}</span>
+          <span class="text-sm font-semibold text-pine">&#2547;{{ item.subtotal }}</span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Drawer Footer with Subtotal -->
+  <div class="p-6 border-t border-ink/10 bg-cream space-y-4 shrink-0">
+    <div class="flex items-center justify-between text-ink font-semibold">
+        <span>Subtotal</span>
+        <span class="text-lg">&#2547;{{ cart.total_price }}</span>
+    </div>
+    <a href="/checkout/" class="block w-full text-center bg-pine hover:bg-pinedeep text-cream font-medium text-sm py-3.5 rounded-md transition shadow-sm">Check Out</a>
+    <a href="/cart/" class="block w-full text-center text-ink text-sm font-medium hover:text-pine hover:underline transition pt-1">View Cart</a>
+  </div>
+
+{% else %}
+  <!-- Empty Cart State -->
+  <div class="flex-grow flex flex-col items-center justify-center text-center space-y-3 opacity-60">
+    <svg class="w-12 h-12 text-ink" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+    <p class="text-sm text-ink">Your cart is empty.</p>
+  </div>
+{% endif %}

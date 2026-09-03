@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  {% if category %}{{ category.name }} | {% elif search_query %}Search: {{ search_query }} | {% else %}Shop All | {% endif %} Kids & Family
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+
+    <div class="mb-8 sm:mb-12 text-center md:text-left border-b border-ink/10 pb-6 sm:pb-8">
+        <h1 class="brand-font text-3xl sm:text-4xl font-semibold text-ink mb-3">
+            {% if category %}
+                {{ category.name }}
+            {% elif search_query %}
+                Search results for &ldquo;{{ search_query }}&rdquo;
+            {% else %}
+                All products
+            {% endif %}
+        </h1>
+        <p class="text-sm text-ink/55">
+            {% if category %}
+                {{ category.description|default:"Everyday wear, cut for this age group." }}
+            {% else %}
+                Everything in the shop, boy's to men's, girl's to women's.
+            {% endif %}
+        </p>
+    </div>
+
+    <div class="flex flex-col lg:flex-row gap-8 lg:gap-10">
+
+        <input type="checkbox" id="filter-toggle" class="hidden peer/filter" />
+
+        <label
+            for="filter-toggle"
+            class="lg:hidden order-1 flex items-center justify-between px-5 py-3.5 bg-paper border border-ink/10 text-sm font-semibold text-ink cursor-pointer peer-checked/filter:[&>svg]:rotate-180"
+        >
+            <span class="flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M3 4h18M6 12h12M10 20h4"/></svg>
+                Filters
+                {% if selected_slugs %}<span id="filter-count-badge" class="text-xs text-cream bg-pine rounded-full w-5 h-5 flex items-center justify-center">{{ selected_slugs|length }}</span>{% endif %}
+            </span>
+            <svg class="w-4 h-4 transition duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M19 9l-7 7-7-7"/></svg>
+        </label>
+
+        <aside class="order-2 hidden peer-checked/filter:block lg:block w-full lg:w-1/4 shrink-0">
+            <form method="get" id="filter-form" data-base-url="{{ request.path }}" class="lg:sticky lg:top-24 bg-paper border border-ink/10 divide-y divide-ink/10">
+
+                {% if search_query %}<input type="hidden" name="q" value="{{ search_query }}">{% endif %}
+
+                <div class="p-5">
+                    <p class="brand-font italic text-lg text-ink/80">Refine your search</p>
+                </div>
+
+                <div class="p-5">
+                    <a href="{% url 'store:product_list' %}" class="flex items-center gap-2.5 text-sm transition {% if not category %}text-ink font-semibold{% else %}text-ink/55 hover:text-ink{% endif %}">
+                        <span class="w-1.5 h-1.5 shrink-0 bg-mustard {% if category %}opacity-0{% endif %}"></span>
+                        All products
+                    </a>
+                </div>
+
+                {% for cat in categories %}
+                <details class="group p-5" {% if category.slug == cat.slug or category.parent_id == cat.id %}open{% endif %}>
+                    <summary class="flex items-center justify-between cursor-pointer list-none text-sm font-semibold text-ink">
+                        {{ cat.name }}
+                        <svg class="w-3.5 h-3.5 text-ink/40 transition duration-300 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </summary>
+
+                    <div class="mt-4 space-y-3">
+                        {% for sub in cat.children.all %}
+                        <label class="flex items-center gap-2.5 text-sm text-ink/65 hover:text-ink cursor-pointer">
+                            <input
+                                type="checkbox" name="cat" value="{{ sub.slug }}"
+                                {% if sub.slug in selected_slugs %}checked{% endif %}
+                                class="cat-filter-checkbox peer sr-only"
+                            >
+                            <span class="w-4 h-4 shrink-0 border border-ink/25 peer-checked:bg-pine peer-checked:border-pine transition"></span>
+                            {{ sub.name }}
+                        </label>
+                        {% empty %}
+                        <p class="text-xs text-ink/40">No subcategories yet.</p>
+                        {% endfor %}
+                    </div>
+                </details>
+                {% endfor %}
+
+                <div class="p-5 flex gap-2">
+                    <button type="submit" class="flex-1 bg-pine hover:bg-pinedeep text-cream text-sm font-semibold py-2.5 transition">
+                        Apply filters
+                    </button>
+                    <a href="{{ request.path }}" id="clear-filters-btn" class="px-4 py-2.5 border border-ink/15 text-ink/60 hover:text-ink hover:border-ink text-sm transition">
+                        Clear
+                    </a>
+                </div>
+            </form>
+        </aside>
+
+        <div class="order-3 lg:order-2 w-full lg:w-3/4">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 pb-4 border-b border-ink/10">
+                <p class="text-sm text-ink/55" id="results-count-outer" style="display:none;"></p>
+                <p class="text-sm text-ink/55" id="results-count-static">Showing {{ page_obj.paginator.count }} product{{ page_obj.paginator.count|pluralize }}</p>
+
+                <div class="relative self-start sm:self-auto">
+                    <select id="sort-select" class="appearance-none bg-transparent border border-ink/15 pl-4 pr-9 py-2 text-sm text-ink outline-none focus:border-pine cursor-pointer transition">
+                        <option value="latest" {% if not sort or sort == 'latest' %}selected{% endif %}>Latest arrivals</option>
+                        <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Price: low to high</option>
+                        <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Price: high to low</option>
+                    </select>
+                    <svg class="w-3.5 h-3.5 text-ink/40 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </div>
+            </div>
+
+            <div id="results-container">
+                {% include 'product_results.html' %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form            = document.getElementById('filter-form');
+    const baseUrl          = form.dataset.baseUrl;
+    const checkboxes       = Array.from(document.querySelectorAll('.cat-filter-checkbox'));
+    const sortSelect        = document.getElementById('sort-select');
+    const resultsContainer = document.getElementById('results-container');
+    const staticCount      = document.getElementById('results-count-static');
+    const clearBtn          = document.getElementById('clear-filters-btn');
+    const searchInput       = form.querySelector('input[name="q"]');
+
+    function buildQuery(page) {
+        const params = new URLSearchParams();
+
+        checkboxes.forEach(cb => {
+            if (cb.checked) params.append('cat', cb.value);
+        });
+
+        if (searchInput && searchInput.value) {
+            params.set('q', searchInput.value);
+        }
+
+        if (sortSelect.value && sortSelect.value !== 'latest') {
+            params.set('sort', sortSelect.value);
+        }
+
+        if (page && page > 1) {
+            params.set('page', page);
+        }
+
+        return params.toString();
+    }
+
+    function loadResults(page, pushUrl) {
+        const qs  = buildQuery(page);
+        const url = baseUrl + (qs ? '?' + qs : '');
+
+        resultsContainer.style.opacity = '0.4';
+
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(res => res.json())
+            .then(data => {
+                resultsContainer.innerHTML = data.html;
+                resultsContainer.style.opacity = '1';
+                staticCount.textContent = `Showing ${data.count} product${data.count === 1 ? '' : 's'}`;
+                attachPageLinks();
+
+                if (pushUrl !== false) {
+                    const newUrl = url || baseUrl;
+                    window.history.pushState({}, '', newUrl);
+                }
+
+                updateFilterBadge();
+            })
+            .catch(() => { resultsContainer.style.opacity = '1'; });
+    }
+
+    function updateFilterBadge() {
+        const checkedCount = checkboxes.filter(cb => cb.checked).length;
+        let badge = document.getElementById('filter-count-badge');
+        const labelSpan = document.querySelector('label[for="filter-toggle"] span.flex');
+
+        if (checkedCount > 0) {
+            if (!badge) {
+                badge = document.createElement('span');
+                badge.id = 'filter-count-badge';
+                badge.className = 'text-xs text-cream bg-pine rounded-full w-5 h-5 flex items-center justify-center';
+                labelSpan.appendChild(badge);
+            }
+            badge.textContent = checkedCount;
+        } else if (badge) {
+            badge.remove();
+        }
+    }
+
+    function attachPageLinks() {
+        document.querySelectorAll('.page-link').forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                loadResults(this.dataset.page);
+                window.scrollTo({ top: resultsContainer.offsetTop - 100, behavior: 'smooth' });
+            });
+        });
+
+        document.querySelectorAll('.clear-filters-link').forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                checkboxes.forEach(cb => { cb.checked = false; });
+                loadResults(null);
+            });
+        });
+    }
+
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', () => loadResults(null));
+    });
+
+    sortSelect.addEventListener('change', () => loadResults(null));
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        loadResults(null);
+    });
+
+    clearBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        checkboxes.forEach(cb => { cb.checked = false; });
+        loadResults(null);
+    });
+
+    attachPageLinks();
+
+    window.addEventListener('popstate', function () {
+        const params = new URLSearchParams(window.location.search);
+        checkboxes.forEach(cb => {
+            cb.checked = params.getAll('cat').includes(cb.value);
+        });
+        sortSelect.value = params.get('sort') || 'latest';
+        loadResults(params.get('page'), false);
+    });
+
+    // ============ FAVORITE (heart icon) — event delegation, karon AJAX
+    // filter er por notun button DOM e ashe, tader upor direct listener lagano jay na ============
+    function getCookie(name) {
+        const match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+        return match ? decodeURIComponent(match.pop()) : '';
+    }
+
+    document.body.addEventListener('click', function (e) {
+        const btn = e.target.closest('.favorite-btn');
+        if (!btn) return;
+
+        e.preventDefault();
+        const productId = btn.dataset.productId;
+        const svg = btn.querySelector('svg');
+
+        fetch(`/favorites/toggle/${productId}/`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) return;
+
+                btn.setAttribute('aria-pressed', data.favorited);
+                if (data.favorited) {
+                    btn.classList.remove('text-ink/50', 'hover:text-clay');
+                    btn.classList.add('text-clay');
+                    svg.setAttribute('fill', 'currentColor');
+                } else {
+                    btn.classList.remove('text-clay');
+                    btn.classList.add('text-ink/50', 'hover:text-clay');
+                    svg.setAttribute('fill', 'none');
+                }
+
+                const favBadge = document.getElementById('favorite-count-badge');
+                if (favBadge) favBadge.textContent = data.count;
+            })
+            .catch(() => {});
+    });
+});
+</script>
+
+{% endblock %}

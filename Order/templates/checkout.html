@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout | Kids & Family{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+
+    <h1 class="brand-font text-3xl sm:text-4xl font-semibold text-ink mb-8 border-b border-ink/10 pb-6">Checkout</h1>
+
+    {% if messages %}
+    <div class="mb-6 space-y-2">
+        {% for message in messages %}
+        <div class="text-sm px-4 py-3 border {% if message.tags == 'error' %}border-clay/30 bg-clay/10 text-clay{% else %}border-pine/30 bg-pine/10 text-pine{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="POST" class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
+        {% csrf_token %}
+
+        <!-- SHIPPING DETAILS -->
+        <div class="lg:col-span-7 space-y-6">
+            <div class="bg-paper border border-ink/10 p-5 sm:p-6">
+                <h2 class="brand-font text-lg font-semibold text-ink mb-5">Shipping details</h2>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-ink/60 mb-1.5">Full name</label>
+                        {{ form.full_name }}
+                        {% if form.full_name.errors %}<p class="text-xs text-clay mt-1">{{ form.full_name.errors.0 }}</p>{% endif %}
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-ink/60 mb-1.5">Phone number</label>
+                            {{ form.phone }}
+                            {% if form.phone.errors %}<p class="text-xs text-clay mt-1">{{ form.phone.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-ink/60 mb-1.5">Email (optional)</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}<p class="text-xs text-clay mt-1">{{ form.email.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-ink/60 mb-1.5">Address</label>
+                        {{ form.address_line }}
+                        {% if form.address_line.errors %}<p class="text-xs text-clay mt-1">{{ form.address_line.errors.0 }}</p>{% endif %}
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-ink/60 mb-1.5">City / District</label>
+                        {{ form.city }}
+                        {% if form.city.errors %}<p class="text-xs text-clay mt-1">{{ form.city.errors.0 }}</p>{% endif %}
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-ink/60 mb-1.5">Delivery notes</label>
+                        {{ form.notes }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAYMENT METHOD -->
+            <div class="bg-paper border border-ink/10 p-5 sm:p-6">
+                <h2 class="brand-font text-lg font-semibold text-ink mb-5">Payment method</h2>
+
+                <div class="space-y-3">
+                    {% for radio in form.payment_method %}
+                    <label class="flex items-center gap-3 px-4 py-3.5 border border-ink/15 cursor-pointer has-[:checked]:border-pine has-[:checked]:bg-pine/5 transition">
+                        {{ radio.tag }}
+                        <span class="text-sm text-ink font-medium">{{ radio.choice_label }}</span>
+                        {% if radio.data.value == 'online' %}
+                        <span class="text-[10px] font-semibold px-2 py-[3px] rounded-full bg-mustard/20 text-mustard ml-auto">Coming soon setup</span>
+                        {% endif %}
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- ORDER SUMMARY -->
+        <div class="lg:col-span-5">
+            <div class="lg:sticky lg:top-24 bg-paper border border-ink/10 p-5 sm:p-6">
+                <h2 class="brand-font text-lg font-semibold text-ink mb-5">Order summary</h2>
+
+                <div class="divide-y divide-ink/10 mb-5 max-h-72 overflow-y-auto">
+                    {% for item in items %}
+                    <div class="flex items-center gap-3 py-3">
+                        <div class="w-14 h-16 shrink-0 bg-cream overflow-hidden">
+                            {% if item.variant.image %}
+                                <img src="{{ item.variant.image.url }}" alt="{{ item.variant.product.name }}" class="w-full h-full object-cover">
+                            {% else %}
+                                <img src="https://placehold.co/140x160/EDE9DE/2F4B3C?text=No+Image" alt="Placeholder" class="w-full h-full object-cover">
+                            {% endif %}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs font-semibold text-ink line-clamp-1">{{ item.variant.product.name }}</p>
+                            <p class="text-xs text-ink/45">Qty: {{ item.quantity }}</p>
+                        </div>
+                        <p class="text-sm font-semibold text-ink shrink-0">৳{{ item.subtotal }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="space-y-2 border-t border-ink/10 pt-4 text-sm">
+                    <div class="flex justify-between text-ink/60">
+                        <span>Subtotal</span>
+                        <span>৳{{ cart.total_price }}</span>
+                    </div>
+                    <div class="flex justify-between text-ink/60">
+                        <span>Shipping</span>
+                        <span>৳{{ shipping_fee }}</span>
+                    </div>
+                    <div class="flex justify-between text-base font-semibold text-ink pt-2 border-t border-ink/10">
+                        <span>Total</span>
+                        <span>৳{{ grand_total }}</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full mt-6 px-6 py-3.5 bg-pine hover:bg-pinedeep text-cream font-semibold text-sm rounded-full transition">
+                    Place order
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<style>
+    #id_full_name, #id_phone, #id_email, #id_address_line, #id_city, #id_notes {
+        width: 100%;
+        background: #F3F5EF;
+        border: 1px solid rgba(28,36,32,0.15);
+        padding: 0.65rem 0.9rem;
+        font-size: 0.875rem;
+        color: #1C2420;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+    #id_full_name:focus, #id_phone:focus, #id_email:focus, #id_address_line:focus, #id_city:focus, #id_notes:focus {
+        border-color: #2F4B3C;
+    }
+</style>
+{% endblock %}

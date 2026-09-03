@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}My Orders | Kids & Family{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+
+    <h1 class="brand-font text-3xl sm:text-4xl font-semibold text-ink mb-8 border-b border-ink/10 pb-6">My Orders</h1>
+
+    {% if orders %}
+    <div class="space-y-4">
+        {% for order in orders %}
+        <a href="{% url 'orders:order_detail' order.order_number %}" class="block bg-paper border border-ink/10 hover:border-pine/40 p-5 transition">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+                <div>
+                    <p class="text-sm font-semibold text-ink">{{ order.order_number }}</p>
+                    <p class="text-xs text-ink/45">{{ order.created_at|date:"d M Y, h:i A" }}</p>
+                </div>
+                <span class="text-xs font-semibold px-3 py-1 rounded-full
+                    {% if order.status == 'delivered' %}bg-pine/10 text-pine
+                    {% elif order.status == 'cancelled' %}bg-clay/10 text-clay
+                    {% else %}bg-mustard/15 text-mustard{% endif %}">
+                    {{ order.get_status_display }}
+                </span>
+            </div>
+
+            <div class="flex items-center justify-between text-sm">
+                <p class="text-ink/55">{{ order.items.count }} item{{ order.items.count|pluralize }}</p>
+                <p class="font-semibold text-ink">৳{{ order.total }}</p>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-20 border border-ink/10 bg-paper">
+        <svg class="w-14 h-14 text-ink/25 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+        <h3 class="text-xl text-ink font-semibold">No orders yet</h3>
+        <p class="text-ink/50 mt-2 text-sm">Once you place an order, it'll show up here.</p>
+        <a href="{% url 'store:product_list' %}" class="mt-6 inline-block px-6 py-2.5 border border-pine text-pine text-sm font-semibold rounded-full hover:bg-pine hover:text-cream transition">Start shopping</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

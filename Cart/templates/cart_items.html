@@ -1,0 +1,70 @@
+{% if items %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10 items-start">
+
+  <div class="lg:col-span-2 divide-y divide-ink/10 border border-ink/10 bg-paper">
+    {% for item in items %}
+    <div class="cart-row flex flex-col sm:flex-row sm:items-center gap-4 p-4 sm:p-5" id="cart-row-{{ item.id }}">
+
+      <div class="flex gap-4 flex-1 min-w-0">
+        <div class="w-20 h-24 sm:w-24 sm:h-28 shrink-0 bg-cream overflow-hidden">
+          {% if item.variant.image %}
+              <img src="{{ item.variant.image.url }}" alt="{{ item.variant.product.name }}" class="w-full h-full object-cover">
+          {% else %}
+              <img src="https://placehold.co/200x240/EDE9DE/2F4B3C?text=No+Image" alt="Placeholder" class="w-full h-full object-cover">
+          {% endif %}
+        </div>
+
+        <div class="flex-1 min-w-0">
+          <h3 class="text-sm font-semibold text-ink line-clamp-2">
+              <a href="{% url 'store:product_detail' item.variant.product.id %}" class="hover:text-pine transition">{{ item.variant.product.name }}</a>
+          </h3>
+          <p class="text-xs text-ink/50 mt-1">SKU: {{ item.variant.sku }}</p>
+          <p class="text-sm font-semibold text-ink mt-2 sm:hidden row-subtotal">&#2547;{{ item.subtotal }}</p>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between sm:justify-end gap-5 sm:gap-6 shrink-0 sm:pl-4">
+        <div class="flex items-center border border-ink/15">
+            <button type="button" class="qty-btn w-8 h-9 text-ink/60 hover:text-ink transition" data-item-id="{{ item.id }}" data-action="decrease">-</button>
+            <span class="qty-value w-8 text-center text-sm font-semibold text-ink">{{ item.quantity }}</span>
+            <button type="button" class="qty-btn w-8 h-9 text-ink/60 hover:text-ink transition" data-item-id="{{ item.id }}" data-action="increase">+</button>
+        </div>
+
+        <p class="hidden sm:block w-20 text-right text-sm font-semibold text-ink row-subtotal">&#2547;{{ item.subtotal }}</p>
+
+        <button type="button" class="remove-item-btn shrink-0 p-2 text-ink/40 hover:text-clay transition" data-item-id="{{ item.id }}" aria-label="Remove item">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+        </button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="lg:col-span-1">
+    <div class="lg:sticky lg:top-24 bg-paper border border-ink/10 p-6 space-y-5">
+      <h2 class="brand-font text-lg text-ink">Order summary</h2>
+
+      <div class="flex items-baseline justify-between pt-1">
+        <span class="text-sm text-ink/60">Subtotal</span>
+        <span id="cart-total-value" class="text-2xl font-semibold text-ink">&#2547;{{ cart.total_price }}</span>
+      </div>
+      <p class="text-xs text-ink/45 -mt-2">Shipping and any discounts are calculated at checkout.</p>
+
+      <a href="/checkout/" class="block w-full text-center px-8 py-3.5 bg-pine hover:bg-pinedeep text-cream font-semibold text-sm rounded-full transition">
+          Proceed to checkout
+      </a>
+      <a href="{% url 'store:product_list' %}" class="block w-full text-center text-sm text-ink/60 hover:text-ink transition">
+          Continue shopping
+      </a>
+    </div>
+  </div>
+
+</div>
+{% else %}
+<div class="text-center py-20 border border-ink/10 bg-paper">
+    <svg class="w-14 h-14 text-ink/25 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+    <h3 class="text-xl text-ink font-semibold">Your bag is empty</h3>
+    <p class="text-ink/50 mt-2 text-sm">Add something you like and it'll show up here.</p>
+    <a href="{% url 'store:product_list' %}" class="mt-6 inline-block px-6 py-2.5 border border-pine text-pine text-sm font-semibold rounded-full hover:bg-pine hover:text-cream transition">Start shopping</a>
+</div>
+{% endif %}

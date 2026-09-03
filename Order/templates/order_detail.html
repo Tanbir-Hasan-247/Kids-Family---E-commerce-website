@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Order {{ order.order_number }} | Kids & Family{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 py-10 sm:py-12">
+
+    <a href="{% url 'orders:order_history' %}" class="inline-flex items-center gap-1.5 text-xs text-ink/50 hover:text-ink transition mb-6">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+        Back to orders
+    </a>
+
+    <div class="mb-8">
+        <h1 class="brand-font text-2xl sm:text-3xl font-semibold text-ink mb-1">{{ order.order_number }}</h1>
+        <p class="text-sm text-ink/55">Placed on {{ order.created_at|date:"d M Y, h:i A" }}</p>
+    </div>
+
+    <div class="bg-paper border border-ink/10 p-5 sm:p-6 mb-6">
+        <div class="flex flex-wrap justify-between gap-4 pb-5 mb-5 border-b border-ink/10 text-sm">
+            <div>
+                <p class="text-xs text-ink/45 mb-1">Payment method</p>
+                <p class="font-semibold text-ink">{{ order.get_payment_method_display }}</p>
+            </div>
+            <div>
+                <p class="text-xs text-ink/45 mb-1">Payment status</p>
+                <p class="font-semibold {% if order.payment_status == 'paid' %}text-pine{% else %}text-mustard{% endif %}">{{ order.get_payment_status_display }}</p>
+            </div>
+            <div>
+                <p class="text-xs text-ink/45 mb-1">Order status</p>
+                <p class="font-semibold text-ink">{{ order.get_status_display }}</p>
+            </div>
+        </div>
+
+        <div class="divide-y divide-ink/10">
+            {% for item in order.items.all %}
+            <div class="flex items-center gap-3 py-3">
+                <div class="w-14 h-16 shrink-0 bg-cream overflow-hidden">
+                    {% if item.variant.image %}
+                        <img src="{{ item.variant.image.url }}" alt="{{ item.product_name }}" class="w-full h-full object-cover">
+                    {% else %}
+                        <img src="https://placehold.co/140x160/EDE9DE/2F4B3C?text=No+Image" alt="Placeholder" class="w-full h-full object-cover">
+                    {% endif %}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-ink line-clamp-1">{{ item.product_name }}</p>
+                    <p class="text-xs text-ink/45">Qty: {{ item.quantity }} &middot; SKU: {{ item.variant_sku }}</p>
+                </div>
+                <p class="text-sm font-semibold text-ink shrink-0">৳{{ item.subtotal }}</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="space-y-2 border-t border-ink/10 pt-4 mt-2 text-sm">
+            <div class="flex justify-between text-ink/60">
+                <span>Subtotal</span>
+                <span>৳{{ order.subtotal }}</span>
+            </div>
+            <div class="flex justify-between text-ink/60">
+                <span>Shipping</span>
+                <span>৳{{ order.shipping_fee }}</span>
+            </div>
+            <div class="flex justify-between text-base font-semibold text-ink pt-2 border-t border-ink/10">
+                <span>Total</span>
+                <span>৳{{ order.total }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-paper border border-ink/10 p-5 sm:p-6 text-sm">
+        <p class="text-xs text-ink/45 mb-1">Shipping to</p>
+        <p class="text-ink font-medium">{{ order.full_name }} &middot; {{ order.phone }}</p>
+        <p class="text-ink/70 mt-1">{{ order.address_line }}, {{ order.city }}</p>
+        {% if order.notes %}<p class="text-ink/50 mt-2 text-xs italic">Note: {{ order.notes }}</p>{% endif %}
+    </div>
+
+    {% if order.payment_method == 'online' and order.payment_status != 'paid' %}
+    <a href="{% url 'orders:payment_stub' order.order_number %}" class="block text-center mt-6 px-6 py-3 bg-mustard hover:bg-mustard/90 text-pinedeep font-semibold text-sm rounded-full transition">
+        Complete payment
+    </a>
+    {% endif %}
+</div>
+{% endblock %}
