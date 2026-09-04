@@ -1,0 +1,75 @@
+{% extends 'base_dashboard.html' %}
+
+{% block title %}Products{% endblock %}
+{% block page_title %}Products{% endblock %}
+
+{% block dashboard_content %}
+
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+    <form method="GET" class="relative">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input type="text" name="q" value="{{ search }}" placeholder="Search products..." class="w-64 max-w-full bg-paper border border-ink/15 pl-9 pr-3 py-2 text-sm outline-none focus:border-pine transition">
+    </form>
+
+    <a href="{% url 'dashboard:product_create_admin' %}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-pine hover:bg-pinedeep text-cream font-semibold text-sm rounded-full transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Add product
+    </a>
+</div>
+
+<div class="bg-paper border border-ink/10 overflow-hidden">
+    <table class="w-full text-sm">
+        <thead>
+            <tr class="text-left text-xs text-ink/45 border-b border-ink/10">
+                <th class="p-4 font-medium">Product</th>
+                <th class="p-4 font-medium">Category</th>
+                <th class="p-4 font-medium">Variants</th>
+                <th class="p-4 font-medium">Stock</th>
+                <th class="p-4 font-medium">Status</th>
+                <th class="p-4 font-medium text-right">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-ink/5">
+            {% for product in page_obj %}
+            <tr class="hover:bg-cream/50 transition">
+                <td class="p-4">
+                    <p class="font-medium text-ink">{{ product.name }}</p>
+                    <p class="text-xs text-ink/40">৳{{ product.base_price }}</p>
+                </td>
+                <td class="p-4 text-ink/70">{{ product.category.name }}</td>
+                <td class="p-4 text-ink/70">{{ product.variants.count }}</td>
+                <td class="p-4 text-ink/70">
+                    {% with total_stock=product.variants.all|length %}
+                        {{ total_stock }} variant{{ total_stock|pluralize }}
+                    {% endwith %}
+                </td>
+                <td class="p-4">
+                    <span class="text-xs font-semibold px-2.5 py-1 rounded-full {% if product.is_active %}bg-pine/10 text-pine{% else %}bg-ink/10 text-ink/50{% endif %}">
+                        {% if product.is_active %}Active{% else %}Inactive{% endif %}
+                    </span>
+                </td>
+                <td class="p-4 text-right whitespace-nowrap">
+                    <a href="{% url 'dashboard:product_edit_admin' product.id %}" class="text-xs text-pine hover:underline mr-4">Edit</a>
+                    <a href="{% url 'dashboard:product_delete_admin' product.id %}" class="text-xs text-clay hover:underline">Delete</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="p-8 text-center text-ink/40">No products found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if page_obj.has_other_pages %}
+<div class="mt-6 flex justify-center gap-2">
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}{% if search %}&q={{ search }}{% endif %}" class="px-3 py-1.5 text-sm border border-ink/15 hover:border-pine transition">Prev</a>
+    {% endif %}
+    <span class="px-3 py-1.5 text-sm text-ink/50">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}{% if search %}&q={{ search }}{% endif %}" class="px-3 py-1.5 text-sm border border-ink/15 hover:border-pine transition">Next</a>
+    {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}

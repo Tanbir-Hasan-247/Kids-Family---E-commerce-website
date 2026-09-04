@@ -34,23 +34,13 @@ class UserRegistrationView(CreateView):
 class UserLoginView(LoginView):
     form_class = LoginForm
     template_name = 'signin.html'
-    
-    # def dispatch(self, request, *args, **kwargs):
-    #     if request.user.is_authenticated:
-    #         user = request.user
-    #         if user.role == 'agent':
-    #             return redirect('agent_dashboard')
-    #         if user.role == 'admin' or user.is_superuser:
-    #             return redirect('admin_dashboard')
-    #         return redirect('home')
-    #     return super().dispatch(request, *args, **kwargs)
-    
+
     def get_success_url(self):
-        # user = self.request.user
-        # if user.role == 'agent':
-        #     return reverse_lazy('agent_dashboard')
-        # if user.role == 'admin' or user.is_superuser:
-        #     return reverse_lazy('admin_dashboard')
+        user = self.request.user
+
+        if user.is_superuser or user.groups.filter(name="monaretor").exists():
+            return reverse_lazy('dashboard:dashboard_home')
+
         return reverse_lazy('home')
 
 

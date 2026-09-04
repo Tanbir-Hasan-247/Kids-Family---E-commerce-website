@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Server Error | Kids & Family{% endblock %}
+
+{% block content %}
+<div class="flex-grow flex items-center justify-center py-20 px-4 sm:px-6 min-h-[60vh]">
+    <div class="text-center max-w-lg mx-auto bg-paper border border-ink/10 p-10 sm:p-16 shadow-sm">
+        
+        <!-- Alert Icon -->
+        <svg class="w-20 h-20 text-clay mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+        
+        <h1 class="brand-font text-6xl sm:text-7xl font-semibold text-clay mb-4">500</h1>
+        
+        <h2 class="text-xl sm:text-2xl font-semibold text-ink mb-3">
+            Something went wrong.
+        </h2>
+        
+        <p class="text-sm text-ink/60 mb-8 leading-relaxed">
+            Sorry, we're experiencing an internal server issue on our end. Our team has been notified and is working to fix it. Please try again later.
+        </p>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <button onclick="window.location.reload()" class="w-full sm:w-auto px-8 py-3.5 bg-pine hover:bg-pinedeep text-cream font-semibold text-sm rounded-full transition">
+                Refresh page
+            </button>
+            <a href="/" class="w-full sm:w-auto px-8 py-3.5 bg-transparent border border-ink/20 text-ink hover:border-ink hover:text-ink text-sm font-semibold rounded-full transition">
+                Go home
+            </a>
+        </div>
+        
+    </div>
+</div>
+{% endblock %}

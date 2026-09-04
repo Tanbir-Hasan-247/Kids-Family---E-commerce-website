@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Dashboard{% endblock %} | Kids & Family Admin</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              cream: "#F3F5EF",
+              paper: "#FFFFFF",
+              pine: "#2F4B3C",
+              pinedeep: "#1E3128",
+              mustard: "#D9A441",
+              ink: "#1C2420",
+              taupe: "#8A8177",
+              clay: "#C46A4B",
+            },
+            fontFamily: { serif: ["Fraunces", "serif"] },
+          },
+        },
+      };
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <style>
+      body { font-family: "Inter", sans-serif; }
+      .brand-font { font-family: "Fraunces", serif; }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      @media (prefers-reduced-motion: reduce) {
+        * { transition: none !important; animation: none !important; }
+      }
+    </style>
+    {% block extra_head %}{% endblock %}
+  </head>
+
+  <body class="bg-cream text-ink antialiased min-h-screen flex">
+
+    <!-- Mobile drawer toggle — body-er direct child, jate overlay/drawer er sathe sibling thake -->
+    <input type="checkbox" id="admin-mobile-menu-toggle" class="hidden peer/adminmenu" />
+
+    <!-- ===================================================== -->
+    <!-- SIDEBAR NAV CONTENT (dutokhaneই reuse hocche — desktop e static, mobile drawer e) -->
+    <!-- ===================================================== -->
+    {% comment %}
+      Ei nav-block ta desktop sidebar ebong mobile drawer — dutokhaneই almost same,
+      tai duibar likhte hocche (Django-te component/macro nei). Kono link change korle
+      dutojaigatei update korte hobe.
+    {% endcomment %}
+
+    <!-- DESKTOP SIDEBAR -->
+    <aside class="hidden md:flex flex-col w-60 shrink-0 bg-pinedeep text-cream/80 h-screen sticky top-0 overflow-y-auto no-scrollbar">
+      <div class="px-6 py-6 border-b border-cream/10">
+        <a href="{% url 'dashboard:dashboard_home' %}" class="flex items-baseline gap-1">
+          <span class="brand-font text-lg font-semibold text-cream">Kids</span>
+          <span class="brand-font text-lg italic text-mustard">&amp;</span>
+          <span class="brand-font text-lg font-semibold text-cream">Family</span>
+        </a>
+        <p class="text-[10px] uppercase tracking-widest text-cream/40 mt-1">Admin dashboard</p>
+      </div>
+
+      <nav class="flex-1 px-4 py-6 space-y-1 text-sm">
+        <a href="{% url 'dashboard:dashboard_home' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-md transition {% if request.resolver_match.url_name == 'dashboard_home' %}bg-cream/10 text-cream font-semibold{% else %}text-cream/60 hover:bg-cream/5 hover:text-cream{% endif %}">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          Overview
+        </a>
+        <a href="{% url 'dashboard:product_list_admin' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-md transition {% if 'product' in request.resolver_match.url_name %}bg-cream/10 text-cream font-semibold{% else %}text-cream/60 hover:bg-cream/5 hover:text-cream{% endif %}">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+          Products
+        </a>
+        <a href="{% url 'dashboard:order_list_admin' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-md transition {% if 'order' in request.resolver_match.url_name %}bg-cream/10 text-cream font-semibold{% else %}text-cream/60 hover:bg-cream/5 hover:text-cream{% endif %}">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          Orders
+        </a>
+      </nav>
+
+      <div class="px-4 py-5 border-t border-cream/10">
+        <a href="/" class="flex items-center gap-2 px-3 py-2 text-xs text-cream/50 hover:text-cream transition">
+          <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          Back to store
+        </a>
+      </div>
+    </aside>
+
+    <!-- MOBILE DRAWER (peer-checked/adminmenu) -->
+    <label for="admin-mobile-menu-toggle" class="md:hidden fixed inset-0 bg-ink/50 z-40 hidden peer-checked/adminmenu:block transition-opacity"></label>
+    <aside class="md:hidden fixed top-0 left-0 h-full w-64 max-w-[80vw] bg-pinedeep text-cream/80 z-40 transform -translate-x-full peer-checked/adminmenu:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col">
+      <div class="px-6 py-6 border-b border-cream/10 flex items-center justify-between">
+        <a href="{% url 'dashboard:dashboard_home' %}" class="flex items-baseline gap-1">
+          <span class="brand-font text-lg font-semibold text-cream">Kids</span>
+          <span class="brand-font text-lg italic text-mustard">&amp;</span>
+          <span class="brand-font text-lg font-semibold text-cream">Family</span>
+        </a>
+        <label for="admin-mobile-menu-toggle" class="cursor-pointer text-cream/60 hover:text-cream transition p-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </label>
+      </div>
+
+      <nav class="flex-1 px-4 py-6 space-y-1 text-sm overflow-y-auto">
+        <a href="{% url 'dashboard:dashboard_home' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-md transition {% if request.resolver_match.url_name == 'dashboard_home' %}bg-cream/10 text-cream font-semibold{% else %}text-cream/60 hover:bg-cream/5 hover:text-cream{% endif %}">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          Overview
+        </a>
+        <a href="{% url 'dashboard:product_list_admin' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-md transition {% if 'product' in request.resolver_match.url_name %}bg-cream/10 text-cream font-semibold{% else %}text-cream/60 hover:bg-cream/5 hover:text-cream{% endif %}">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+          Products
+        </a>
+        <a href="{% url 'dashboard:order_list_admin' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-md transition {% if 'order' in request.resolver_match.url_name %}bg-cream/10 text-cream font-semibold{% else %}text-cream/60 hover:bg-cream/5 hover:text-cream{% endif %}">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          Orders
+        </a>
+      </nav>
+
+      <div class="px-4 py-5 border-t border-cream/10 shrink-0">
+        <a href="/" class="flex items-center gap-2 px-3 py-2 text-xs text-cream/50 hover:text-cream transition">
+          <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          Back to store
+        </a>
+      </div>
+    </aside>
+
+    <!-- ===================================================== -->
+    <!-- MAIN -->
+    <!-- ===================================================== -->
+    <div class="flex-1 min-w-0 flex flex-col">
+
+      <!-- TOPBAR -->
+      <header class="sticky top-0 z-30 bg-cream/95 backdrop-blur-md border-b border-ink/10">
+        <div class="px-4 sm:px-8 h-16 flex items-center justify-between gap-3 sm:gap-4">
+          <div class="flex items-center gap-3 min-w-0">
+            <label for="admin-mobile-menu-toggle" class="md:hidden shrink-0 cursor-pointer text-ink/70 hover:text-ink transition p-1.5 -ml-1.5">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </label>
+            <h1 class="brand-font text-base sm:text-lg font-semibold text-ink truncate">{% block page_title %}Dashboard{% endblock %}</h1>
+          </div>
+
+          <div class="flex items-center gap-2 sm:gap-4 shrink-0">
+            <!-- NOTIFICATION BELL -->
+            <a href="{% url 'dashboard:order_list_admin' %}?status=pending" class="relative p-2 text-ink/60 hover:text-ink transition">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+              <span id="notif-badge" class="hidden absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] px-1 rounded-full bg-clay text-cream text-[9px] font-bold flex items-center justify-center">0</span>
+            </a>
+
+            <span class="text-xs text-ink/50 hidden sm:inline truncate max-w-[140px]">{{ request.user.email|default:request.user.username }}</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="flex-1 p-4 sm:p-8">
+        {% if messages %}
+        <div class="mb-6 space-y-2">
+            {% for message in messages %}
+            <div class="text-sm px-4 py-3 border {% if message.tags == 'error' %}border-clay/30 bg-clay/10 text-clay{% else %}border-pine/30 bg-pine/10 text-pine{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block dashboard_content %}{% endblock %}
+      </main>
+    </div>
+
+    <script>
+      // ============ Notification bell polling ============
+      function pollNotifications() {
+        fetch("{% url 'dashboard:notifications_count' %}")
+          .then(res => res.json())
+          .then(data => {
+            const badge = document.getElementById('notif-badge');
+            if (data.count > 0) {
+              badge.textContent = data.count;
+              badge.classList.remove('hidden');
+            } else {
+              badge.classList.add('hidden');
+            }
+          })
+          .catch(() => {});
+      }
+      pollNotifications();
+      setInterval(pollNotifications, 20000);  // 20 sec por por check kore
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
+  </body>
+</html>

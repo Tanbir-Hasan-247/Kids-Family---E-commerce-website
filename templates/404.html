@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Page Not Found | Kids & Family{% endblock %}
+
+{% block content %}
+<div class="flex-grow flex items-center justify-center py-20 px-4 sm:px-6 min-h-[60vh]">
+    <div class="text-center max-w-lg mx-auto bg-paper border border-ink/10 p-10 sm:p-16 shadow-sm">
+        
+        <!-- Playful/Error Icon -->
+        <svg class="w-20 h-20 text-mustard mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        
+        <h1 class="brand-font text-6xl sm:text-7xl font-semibold text-pine mb-4">404</h1>
+        
+        <h2 class="text-xl sm:text-2xl font-semibold text-ink mb-3">
+            Oops! We lost that page.
+        </h2>
+        
+        <p class="text-sm text-ink/60 mb-8 leading-relaxed">
+            We can't seem to find the page you're looking for. It might have been moved, renamed, or perhaps the link is broken.
+        </p>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a href="/" class="w-full sm:w-auto px-8 py-3.5 bg-pine hover:bg-pinedeep text-cream font-semibold text-sm rounded-full transition">
+                Back to home
+            </a>
+            <a href="{% url 'store:product_list' %}" class="w-full sm:w-auto px-8 py-3.5 bg-transparent border border-ink/20 text-ink hover:border-ink hover:text-ink text-sm font-semibold rounded-full transition">
+                Shop products
+            </a>
+        </div>
+        
+    </div>
+</div>
+{% endblock %}

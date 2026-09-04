@@ -1,0 +1,93 @@
+{% extends 'base_dashboard.html' %}
+
+{% block title %}{% if is_edit %}Edit product{% else %}Add product{% endif %}{% endblock %}
+{% block page_title %}{% if is_edit %}Edit product{% else %}Add product{% endif %}{% endblock %}
+
+{% block dashboard_content %}
+
+<form method="POST" enctype="multipart/form-data" class="max-w-3xl space-y-6">
+    {% csrf_token %}
+
+    <div class="bg-paper border border-ink/10 p-5 sm:p-6">
+        <h2 class="text-sm font-semibold text-ink mb-4">Product details</h2>
+        <div class="space-y-4 admin-form">
+            {{ form.as_p }}
+        </div>
+    </div>
+
+    <div class="bg-paper border border-ink/10 p-5 sm:p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-sm font-semibold text-ink">Variants</h2>
+            <button type="button" id="add-variant-btn" class="text-xs text-pine hover:underline">+ Add another variant</button>
+        </div>
+
+        {{ formset.management_form }}
+
+        <div id="variant-formset-container" class="space-y-4">
+            {% for variant_form in formset %}
+            <div class="variant-form border border-ink/10 p-4 relative admin-form">
+                {% if formset.can_delete and variant_form.instance.pk %}
+                <div class="flex justify-end mb-2">
+                    <label class="text-xs text-clay flex items-center gap-1.5">
+                        {{ variant_form.DELETE }} Delete this variant
+                    </label>
+                </div>
+                {% endif %}
+                {{ variant_form.as_p }}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="flex gap-3">
+        <button type="submit" class="px-8 py-3 bg-pine hover:bg-pinedeep text-cream font-semibold text-sm rounded-full transition">
+            {% if is_edit %}Save changes{% else %}Create product{% endif %}
+        </button>
+        <a href="{% url 'dashboard:product_list_admin' %}" class="px-8 py-3 border border-ink/15 text-ink/70 text-sm font-semibold rounded-full hover:border-ink transition">
+            Cancel
+        </a>
+    </div>
+</form>
+
+<style>
+    .admin-form p { margin-bottom: 0.75rem; }
+    .admin-form label { display: block; font-size: 0.75rem; font-weight: 600; color: rgba(28,36,32,0.6); margin-bottom: 0.35rem; }
+    .admin-form input[type=text], .admin-form input[type=number], .admin-form input[type=file],
+    .admin-form textarea, .admin-form select {
+        width: 100%; background: #F3F5EF; border: 1px solid rgba(28,36,32,0.15);
+        padding: 0.6rem 0.85rem; font-size: 0.875rem; color: #1C2420; outline: none;
+    }
+    .admin-form input:focus, .admin-form textarea:focus, .admin-form select:focus { border-color: #2F4B3C; }
+</style>
+
+<script>
+    // "Add another variant" button ekta notun empty form clone kore add kore dey,
+    // Django formset management form er TOTAL_FORMS count update kore
+    document.getElementById('add-variant-btn').addEventListener('click', function () {
+        const container = document.getElementById('variant-formset-container');
+        const totalForms = document.getElementById('id_variants-TOTAL_FORMS')
+            || document.querySelector('[name$="-TOTAL_FORMS"]');
+
+        const forms = container.querySelectorAll('.variant-form');
+        const lastForm = forms[forms.length - 1];
+        const newForm = lastForm.cloneNode(true);
+
+        const formIndex = forms.length;
+        const totalFormsInput = totalForms;
+        const prefix = totalFormsInput.name.replace('-TOTAL_FORMS', '');
+
+        newForm.innerHTML = newForm.innerHTML
+            .replace(new RegExp(`${prefix}-(\\d+)-`, 'g'), `${prefix}-${formIndex}-`)
+            .replace(new RegExp(`${prefix}_(\\d+)_`, 'g'), `${prefix}_${formIndex}_`);
+
+        // Clear values in the cloned form (except delete checkbox which is fine to reset)
+        newForm.querySelectorAll('input, textarea, select').forEach(el => {
+            if (el.type !== 'checkbox' && el.type !== 'radio') el.value = '';
+            if (el.type === 'checkbox') el.checked = false;
+        });
+
+        container.appendChild(newForm);
+        totalFormsInput.value = formIndex + 1;
+    });
+</script>
+{% endblock %}

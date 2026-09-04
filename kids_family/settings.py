@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-w+(apgi&dw8_p4axd5ff9a_g*6(fsyjbyvo860y-jk!pbi1ng^"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []
 AUTH_USER_MODEL = "Account.User"
@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "Cart",
     'Wishlist',
     'Order',
+    'Dashboard',
     "Account",
 
     # Allauth
@@ -176,16 +177,16 @@ INTERNAL_IPS = [
     # ...
 ]
 
-# ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*']
 
-# CSRF_TRUSTED_ORIGINS = [
-#     'https://*.ngrok-free.app', 
-#     'https://*.ngrok.io',
-#     'https://*.ngrok.app', # নতুন ngrok ডোমেইনগুলোর জন্য
-# ]
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.ngrok-free.app', 
+    'https://*.ngrok.io',
+    'https://*.ngrok.app', # নতুন ngrok ডোমেইনগুলোর জন্য
+]
 
-# # Ngrok-এর HTTPS থেকে HTTP তে আসার কনফিউশন দূর করার জন্য
-# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# Ngrok-এর HTTPS থেকে HTTP তে আসার কনফিউশন দূর করার জন্য
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration

@@ -11,5 +11,5 @@ class ProductForm(forms.ModelForm):
 VariantFormSet = inlineformset_factory(
     Product, ProductVariant,
     fields=['attributes', 'sku', 'price', 'stock', 'image'],
-    extra=3, can_delete=True
+    extra=1, can_delete=True
 )

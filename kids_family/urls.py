@@ -29,6 +29,7 @@ urlpatterns = [
     path('', include('Wishlist.urls')),
     path('', include('Order.urls')),
     path("", include("Account.urls")),
+    path("", include("Dashboard.urls")),
     path("accounts/", include("allauth.urls")),
     path('', views.home_view, name='home'),
 ] + debug_toolbar_urls()
